@@ -1,6 +1,6 @@
 # TechZone Laptop — E-commerce Frontend
 
-A modern, full-featured e-commerce frontend for a laptop retail platform, built with **React 19**, **Redux Toolkit**, and **Tailwind CSS v4**. This application is the client-facing layer of a microservices-based graduation thesis project.
+A modern, full-featured e-commerce frontend for a laptop retail platform, built with **React 19**, **Redux Toolkit**, and **Tailwind CSS v4**. This application is the client-facing layer of a microservices-based e-commerce platform designed for the graduation thesis: *"Laptop E-commerce Platform Using Microservices Architecture"*.
 
 ---
 
@@ -13,6 +13,7 @@ A modern, full-featured e-commerce frontend for a laptop retail platform, built 
 5. [Trade-offs & Design Decisions](#trade-offs--design-decisions)
 6. [Getting Started](#getting-started)
 7. [Environment Variables](#environment-variables)
+8. [License](#license)
 
 ---
 
@@ -85,7 +86,7 @@ All API calls pass through a single gateway endpoint. The frontend is unaware of
 | **React** | 19.1 | UI library | Component-based architecture, large ecosystem, hooks API for clean state logic |
 | **Redux Toolkit** | 2.9 | Global state management | Centralized store for auth, cart, products, and orders; thunks for async API calls; predictable state updates across deeply nested components |
 | **React Router DOM** | 7.9 | Client-side routing | Declarative routing with nested layouts, protected routes, and URL-based filtering |
-| **Tailwind CSS** | 4.1 (via Vite plugin) | Styling | Utility-first approach enables rapid UI development without context-switching to CSS files; v4's native Vite integration eliminates PostCSS config |
+| **Tailwind CSS** | 4.1 (via Vite plugin) | Styling | Utility-first approach enables rapid UI development without context-switching to CSS files; v4's native Vite integration eliminates PostCSS configuration |
 | **Vite** | 7.1 | Build tool | Near-instant HMR, fast cold starts, native ESM support — significantly faster than Create React App / Webpack |
 
 ### UI & Component Libraries
@@ -209,17 +210,17 @@ src/
 
 **Decision**: Used Redux Toolkit's `configureStore` but wrote reducers with manual `switch/case` statements and string action types instead of `createSlice`.
 
-**Why**: The project was built incrementally — starting with basic Redux patterns and adding features over time. `createSlice` would reduce boilerplate (auto-generated action types, Immer-based immutable updates), but the current approach is explicit and easy to trace during debugging.
+**Why**: The project was built incrementally — starting with basic Redux patterns and adding features over time. `createSlice` would reduce boilerplate (auto-generated action types, Immer-based immutability), but the current structure was sufficient for a thesis-scale project.
 
-**Trade-off**: More verbose code (~600 lines in `action/index.js`), risk of typos in action type strings. For a larger team or longer-lived project, migrating to `createSlice` + `createAsyncThunk` would improve maintainability.
+**Trade-off**: More verbose code (~600 lines in `action/index.js`), risk of typos in action type strings. For a larger team or longer-lived project, migrating to `createSlice` + `createAsyncThunk` would be beneficial.
 
 ### 2. MUI + Tailwind CSS (Dual Styling Systems)
 
 **Decision**: Used MUI for complex interactive components (DataGrid, Select, Radio, Stepper) and Tailwind for everything else (layout, cards, buttons, responsive design).
 
-**Why**: MUI's DataGrid provides server-side pagination, column resizing, and sorting out of the box — rebuilding this in pure Tailwind would take significant effort. Meanwhile, Tailwind enables rapid custom UI development for the storefront, cards, and marketing pages.
+**Why**: MUI's DataGrid provides server-side pagination, column resizing, and sorting out of the box — rebuilding this in pure Tailwind would take significant effort. Meanwhile, Tailwind enables rapid custom styling without vendor-specific component APIs.
 
-**Trade-off**: Two styling paradigms in one project increases bundle size and cognitive overhead. MUI's default styles occasionally conflict with Tailwind (e.g., button colors, font sizes). The `sx` prop is used to override MUI styles where needed. A pure Tailwind approach with a headless table library (like TanStack Table) could reduce bundle size but would require more custom development.
+**Trade-off**: Two styling paradigms in one project increases bundle size and cognitive overhead. MUI's default styles occasionally conflict with Tailwind (e.g., button colors, font sizes). The `!important` overrides in Tailwind config mitigate most conflicts.
 
 ### 3. Client-Side Cart with Server Sync
 
@@ -227,15 +228,15 @@ src/
 
 **Why**: Allows browsing and adding to cart without authentication — a common e-commerce pattern that reduces friction. Server-side cart is only needed at checkout time for order processing.
 
-**Trade-off**: Cart state can become stale if product prices or stock change between adding to cart and checkout. A more robust solution would validate cart items against current inventory at checkout time (the backend likely does this, but the frontend doesn't display validation errors pre-checkout).
+**Trade-off**: Cart state can become stale if product prices or stock change between adding to cart and checkout. A more robust solution would validate cart items against current inventory at checkout time.
 
 ### 4. URL-Based Filter State (Search Params)
 
 **Decision**: All product filters (category, sort order, price range, brand, processor, RAM, storage, keyword, page number) are stored as URL query parameters, not just in component state.
 
-**Why**: Enables shareable/bookmarkable URLs (e.g., `/products?category=Gaming&brands=ASUS,MSI&minPrice=1000`). Custom hooks (`useProductFilter`, etc.) read URL params and dispatch the corresponding API calls, keeping filter logic decoupled from UI components.
+**Why**: Enables shareable/bookmarkable URLs (e.g., `/products?category=Gaming&brands=ASUS,MSI&minPrice=1000`). Custom hooks (`useProductFilter`, etc.) read URL params and dispatch the corresponding API calls automatically.
 
-**Trade-off**: More complex state management — every filter change requires URL navigation, which triggers a re-render cycle. The 700ms debounce on search input mitigates excessive API calls, but rapid filter toggling can still cause multiple requests.
+**Trade-off**: More complex state management — every filter change requires URL navigation, which triggers a re-render cycle. The 700ms debounce on search input mitigates excessive API calls, but a global filter cache would further improve performance.
 
 ### 5. Single Action File vs. Feature-Based Splitting
 
@@ -243,13 +244,13 @@ src/
 
 **Why**: Started small and grew organically. For a thesis project with a single developer, having everything in one file makes global search easy.
 
-**Trade-off**: The file is ~500+ lines and mixes concerns (auth, products, cart, orders, admin). For a production app, splitting into `authActions.js`, `productActions.js`, `cartActions.js`, etc. would improve readability and enable code-splitting.
+**Trade-off**: The file is ~500+ lines and mixes concerns (auth, products, cart, orders, admin). For a production app, splitting into `authActions.js`, `productActions.js`, `cartActions.js`, etc. would improve maintainability.
 
 ### 6. Hardcoded Dashboard Analytics
 
 **Decision**: Dashboard cards and charts use a mix of real API data (product count, total revenue, total orders) and mock/hardcoded values (today's orders, conversion rate, shipped today).
 
-**Why**: The backend analytics endpoints return aggregate counts. Building real-time, time-series analytics would require significant backend work (event sourcing, time-bucketed queries) beyond the thesis scope.
+**Why**: The backend analytics endpoints return aggregate counts. Building real-time, time-series analytics would require significant backend work (event sourcing, time-bucketed queries) beyond the scope of this thesis.
 
 **Trade-off**: The dashboard looks complete visually but isn't fully functional. This is documented as a known limitation and potential future improvement.
 
@@ -267,7 +268,7 @@ src/
 
 **Why**: Centralizes auth configuration. The backend uses HTTP-only cookies for JWT tokens, so `withCredentials` must be set on every request. A single instance avoids repeating this config.
 
-**Trade-off**: No request/response interceptors for automatic token refresh or 401 handling. If the session expires, users see raw error messages instead of being redirected to login. Adding an interceptor that catches 401s and redirects to `/login` would improve UX.
+**Trade-off**: No request/response interceptors for automatic token refresh or 401 handling. If the session expires, users see raw error messages instead of being redirected to login. Adding an interceptor chain would improve UX significantly.
 
 ---
 
@@ -331,6 +332,29 @@ This frontend connects to the following backend microservices through the API Ga
 | **Order Service** | `/order-manager/**` | Cart, orders, Stripe payments, analytics |
 | **Config Server** | — | Centralized configuration (not exposed to frontend) |
 | **Discovery Service** | — | Eureka service registry (not exposed to frontend) |
+
+---
+
+## License
+
+This project is licensed under the **GNU Affero General Public License v3.0 (AGPL-3.0)**.
+
+### What This Means
+
+- ✅ **You can**: Use, modify, and distribute this code freely
+- ✅ **You must**: Include a copy of the license and state changes made
+- ✅ **You must**: Disclose the source code if you deploy modified versions as a network service
+- ❌ **You cannot**: Use this code in proprietary/closed-source projects without permission
+
+### Copyright
+
+**Copyright © 2025 Thái Văn Lâm**
+
+This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful, but **WITHOUT ANY WARRANTY**; without even the implied warranty of **MERCHANTABILITY** or **FITNESS FOR A PARTICULAR PURPOSE**. See the [LICENSE](./LICENSE) file for more details.
+
+For more information about AGPL-3.0, visit: [https://www.gnu.org/licenses/agpl-3.0.html](https://www.gnu.org/licenses/agpl-3.0.html)
 
 ---
 
