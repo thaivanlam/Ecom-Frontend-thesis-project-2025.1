@@ -20,10 +20,6 @@ A modern, full-featured e-commerce frontend for a laptop retail platform, built 
 ## 📌 Related Repository
 
 **Backend Microservices:** [graduation-thesis-microservice-laptop-ecommerce-2](https://github.com/MrBuddhaCoder/graduation-thesis-microservice-laptop-ecommerce-2)
-- Built with Spring Boot 3.5 and Spring Cloud 2025
-- API Gateway runs on port 8080
-- Contains: User Service, Product Service, Order Service, Notification Service
-- Uses RabbitMQ for async messaging and Stripe for payments
 
 ---
 
